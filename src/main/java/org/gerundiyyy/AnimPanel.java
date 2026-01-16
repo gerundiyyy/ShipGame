@@ -11,7 +11,7 @@ public class AnimPanel extends JPanel {
     private final CannonPainter canon = new CannonPainter();
     private final Vector<BallInstance> balls;
     private ShipMotion shipMotion;
-    private ExplosionPainter exp = new ExplosionPainter();
+    private final ExplosionPainter exp = new ExplosionPainter();
 
     public AnimPanel(int startShipX, int startShipY) {
         setPreferredSize(new Dimension(600, 400));
@@ -30,7 +30,7 @@ public class AnimPanel extends JPanel {
     }
 
     public void startBallMotion(BallInstance ballInst) {
-        int startBallX = getWidth()/2;
+        int startBallX = getWidth() / 2;
         int startBallY = getHeight() * 2 / 3 - 20;
 
         ballInst.setMotion(new BallMotion(startBallX, startBallY,
@@ -38,17 +38,17 @@ public class AnimPanel extends JPanel {
                 ThreadLocalRandom.current().nextInt(-3, 3), true,
                 ballInst.getBall(), getWidth(), getHeight() * 2 / 3));
         new Thread(ballInst.getMotion()).start();
-        Timer timer = new Timer(16, new BallTimerListener(this, ballInst, 100));
+        Timer timer = new Timer(16, new BallTimerListener(this, ballInst, 200));
         timer.start();
     }
 
-    public void spawnBall(BallInstance ballInst){
+    public void spawnBall(BallInstance ballInst) {
         balls.add(ballInst);
         startBallMotion(ballInst);
         repaint();
     }
 
-    public void removeBall(BallInstance ballInst){
+    public void removeBall(BallInstance ballInst) {
         balls.remove(ballInst);
     }
 
@@ -80,53 +80,69 @@ public class AnimPanel extends JPanel {
         int w = getWidth();
         int h = getHeight();
         int twoThirds = getHeight() * 2 / 3;
+        Graphics2D graphics = (Graphics2D) g2.create();
 
-        g2.setColor(new Color(41, 235, 242));
-        g2.fillRect(0, 0, w, twoThirds);
+        graphics.setColor(new Color(41, 235, 242));
+        graphics.fillRect(0, 0, w, twoThirds);
 
-        g2.setColor(new Color(242, 193, 41));
-        g2.fillRect(0, twoThirds, w, h - twoThirds);
+        graphics.setColor(new Color(242, 193, 41));
+        graphics.fillRect(0, twoThirds, w, h - twoThirds);
     }
 
     private void paintBalls(Graphics2D g2) {
-        for(BallInstance ballInst : balls){
-            if (ballInst.getMotion() != null) {
-                g2.translate(ballInst.getMotion().getCoordX(), ballInst.getMotion().getCoordY());
-                ballInst.getBall().draw(g2);
-                g2.translate(-ballInst.getMotion().getCoordX(), -ballInst.getMotion().getCoordY());
+        for (BallInstance ballInst : balls) {
+            Graphics2D graphics = (Graphics2D) g2.create();
+            try {
+                if (ballInst.getMotion() != null) {
+                    graphics.translate(ballInst.getMotion().getCoordX(),
+                            ballInst.getMotion().getCoordY());
+                    ballInst.getBall().draw(graphics);
+                }
+            } finally {
+                graphics.dispose();
             }
         }
     }
 
     private void paintCanon(Graphics2D g2) {
-        int startCanonX = getWidth()/2;
+        int startCanonX = getWidth() / 2;
         int startCanonY = getHeight() * 2 / 3 - 20;
-
-        if(canon != null){
-            g2.translate(startCanonX, startCanonY);
-            canon.draw(g2);
-            g2.translate(-startCanonX, -startCanonY);
+        Graphics2D graphics = (Graphics2D) g2.create();
+        try {
+            if (canon != null) {
+                graphics.translate(startCanonX, startCanonY);
+                canon.draw(graphics);
+            }
+        } finally {
+            graphics.dispose();
         }
     }
 
     private void paintShip(Graphics2D g2) {
-        if (ship != null && shipMotion != null) {
-            g2.translate(shipMotion.getCoordX(), shipMotion.getCoordY());
-            ship.draw(g2);
-            g2.translate(-shipMotion.getCoordX(), -shipMotion.getCoordY());
+        Graphics2D graphics = (Graphics2D) g2.create();
+        try {
+            if (ship != null && shipMotion != null) {
+                graphics.translate(shipMotion.getCoordX(), shipMotion.getCoordY());
+                ship.draw(graphics);
+            }
+        } finally {
+            graphics.dispose();
         }
     }
 
     public void paintExplosion(Graphics2D g2) {
-        if (exp != null && ship == null){
-            int Xstep = 0;
-            int Ystep = 0;
-            for(int i = 0 ; i < 3; i++){
-                Xstep = ThreadLocalRandom.current().nextInt(-30, 30);
-                Ystep = ThreadLocalRandom.current().nextInt(-30, 30);
-                g2.translate(shipMotion.getCoordX() + Xstep, shipMotion.getCoordY() + Ystep);
-                exp.draw(g2);
-                g2.translate(-shipMotion.getCoordX() - Xstep, -shipMotion.getCoordY() - Ystep);
+        if (exp != null && ship == null) {
+            int Xstep, Ystep;
+            for (int i = 0; i < 3; i++) {
+                Graphics2D graphics = (Graphics2D) g2.create();
+                try {
+                    Xstep = ThreadLocalRandom.current().nextInt(-30, 30);
+                    Ystep = ThreadLocalRandom.current().nextInt(-30, 30);
+                    graphics.translate(shipMotion.getCoordX() + Xstep, shipMotion.getCoordY() + Ystep);
+                    exp.draw(graphics);
+                } finally {
+                    graphics.dispose();
+                }
             }
         }
     }
