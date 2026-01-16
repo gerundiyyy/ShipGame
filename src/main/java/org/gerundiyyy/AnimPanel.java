@@ -2,7 +2,6 @@ package org.gerundiyyy;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -12,6 +11,8 @@ public class AnimPanel extends JPanel {
     private final Vector<BallInstance> balls;
     private ShipMotion shipMotion;
     private final ExplosionPainter exp = new ExplosionPainter();
+    private SeaPainter seaPainter;
+    private BeachPainter beachPainter;
 
     public AnimPanel(int startShipX, int startShipY) {
         setPreferredSize(new Dimension(600, 400));
@@ -65,6 +66,10 @@ public class AnimPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
+
+        if (seaPainter == null) initSea();
+        if (beachPainter == null) initBeach();
+
         try {
             paintBackgroud(g2);
             paintCanon(g2);
@@ -77,16 +82,28 @@ public class AnimPanel extends JPanel {
     }
 
     private void paintBackgroud(Graphics2D g2) {
-        int w = getWidth();
-        int h = getHeight();
-        int twoThirds = getHeight() * 2 / 3;
+        paintSea(g2);
+        paintBeach(g2);
+    }
+
+    private void paintSea(Graphics2D g2) {
         Graphics2D graphics = (Graphics2D) g2.create();
+        try {
+            graphics.translate(0, 0);
+            seaPainter.draw(graphics);
+        } finally {
+            graphics.dispose();
+        }
+    }
 
-        graphics.setColor(new Color(41, 235, 242));
-        graphics.fillRect(0, 0, w, twoThirds);
-
-        graphics.setColor(new Color(242, 193, 41));
-        graphics.fillRect(0, twoThirds, w, h - twoThirds);
+    private void paintBeach(Graphics2D g2) {
+        Graphics2D graphics = (Graphics2D) g2.create();
+        try {
+            graphics.translate(0, getHeight() * 2 / 3);
+            beachPainter.draw(graphics);
+        } finally {
+            graphics.dispose();
+        }
     }
 
     private void paintBalls(Graphics2D g2) {
@@ -147,6 +164,20 @@ public class AnimPanel extends JPanel {
         }
     }
 
+    public void initSea() {
+        int w = getWidth();
+        int h = getHeight() * 2 / 3;
+
+        seaPainter = new SeaPainter(w, h);
+    }
+
+    public void initBeach() {
+        int w = getWidth();
+        int h = getHeight() / 3;
+
+        beachPainter = new BeachPainter(w, h);
+    }
+
     public void setShipMotion(ShipMotion shipMotion) {
         this.shipMotion = shipMotion;
     }
@@ -165,5 +196,21 @@ public class AnimPanel extends JPanel {
 
     public Vector<BallInstance> getBalls() {
         return balls;
+    }
+
+    public void setSeaPainter(SeaPainter seaPainter) {
+        this.seaPainter = seaPainter;
+    }
+
+    public SeaPainter getSeaPainter() {
+        return seaPainter;
+    }
+
+    public void setBeachPainter(BeachPainter beachPainter) {
+        this.beachPainter = beachPainter;
+    }
+
+    public BeachPainter getBeachPainter() {
+        return beachPainter;
     }
 }

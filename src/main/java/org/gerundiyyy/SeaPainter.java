@@ -18,7 +18,7 @@ public class SeaPainter implements Painter {
     @Override
     public void draw(Graphics2D g2) {
         g2.setColor(new Color(41, 235, 242));
-        g2.fillRect(0, 0, (int) shape.getBounds2D().getWidth(), (int) shape.getBounds2D().getHeight());
+        g2.fill(shape);
     }
 
     @Override
@@ -27,8 +27,8 @@ public class SeaPainter implements Painter {
 
         shape.moveTo(0, 0);
         shape.lineTo(width, 0);
-        shape.lineTo(width, -height);
-        shape.lineTo(0, -height);
+        shape.lineTo(width, height);
+        shape.lineTo(0, height);
         shape.lineTo(0, 0);
         shape.closePath();
     }
@@ -36,5 +36,21 @@ public class SeaPainter implements Painter {
     @Override
     public Rectangle2D getBounds() {
         return null;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 }

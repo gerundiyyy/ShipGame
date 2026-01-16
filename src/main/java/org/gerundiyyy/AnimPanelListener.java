@@ -16,6 +16,8 @@ public class AnimPanelListener extends ComponentAdapter{
 
     @Override
     public void componentShown(ComponentEvent e) {
+//        ap.initBeach();
+//        ap.initSea();
         ap.startShipMotion(startX, startY);
         ap.addMouseListener(new ShotListener(ap));
     }
