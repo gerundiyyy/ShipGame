@@ -4,11 +4,10 @@ import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
-public class ExplosionPainter implements Drawable {
+public class ExplosionPainter implements IDrawable {
     private Path2D shape;
 
     public ExplosionPainter() {
-        shape = new Path2D.Float();
         createShapeOfTheFigure();
     }
 
@@ -27,6 +26,7 @@ public class ExplosionPainter implements Drawable {
         }
     }
 
+    @Override
     public void createShapeOfTheFigure() {
         shape = new Path2D.Float();
 
@@ -49,6 +49,7 @@ public class ExplosionPainter implements Drawable {
         shape.closePath();
     }
 
+    @Override
     public Rectangle2D getBounds() {
         return shape.getBounds2D();
     }

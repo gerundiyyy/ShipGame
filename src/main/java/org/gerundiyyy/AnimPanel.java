@@ -2,53 +2,58 @@ package org.gerundiyyy;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AnimPanel extends JPanel {
+    private GameConfig config;
     private ShipPainter ship = new ShipPainter();
     private final CannonPainter canon = new CannonPainter();
-    private final Vector<BallInstance> balls;
+    private final Vector<BallEntity> balls;
     private ShipMotion shipMotion;
-    private ExplosionPainter exp = new ExplosionPainter();
+    private final ExplosionPainter exp = new ExplosionPainter();
+    private SeaPainter seaPainter;
+    private BeachPainter beachPainter;
 
-    public AnimPanel(int startShipX, int startShipY) {
-        setPreferredSize(new Dimension(600, 400));
-        addComponentListener(new AnimPanelListener(this, startShipX, startShipY));
+    //Config
+    public AnimPanel(GameConfig config) {
+        this.config = config;
+        addComponentListener(new AnimPanelListener(this,
+                config.getShipCoordX(), config.getShipCoordY()));
         balls = new Vector<>();
     }
 
+    //Config
     public void startShipMotion(int startShipX, int startShipY) {
         shipMotion = new ShipMotion(startShipX, startShipY,
-                ThreadLocalRandom.current().nextInt(2, 5),
-                ThreadLocalRandom.current().nextInt(0, 3), true,
+                config.getShipSpeedX(), config.getShipSpeedY(),true,
                 ship, getWidth(), getHeight() * 2 / 3);
         new Thread(shipMotion).start();
         Timer timer = new Timer(16, new ShipTimerListener(this));
         timer.start();
     }
 
-    public void startBallMotion(BallInstance ballInst) {
-        int startBallX = getWidth()/2;
+    //Config
+    public void startBallMotion(BallEntity ballEntity) {
+        int startBallX = getWidth() / 2;
         int startBallY = getHeight() * 2 / 3 - 20;
 
-        ballInst.setMotion(new BallMotion(startBallX, startBallY,
+        ballEntity.setBallMotion(new BallMotion(startBallX, startBallY,
                 ThreadLocalRandom.current().nextInt(-5, 5),
                 ThreadLocalRandom.current().nextInt(-3, 3), true,
-                ballInst.getBall(), getWidth(), getHeight() * 2 / 3));
-        new Thread(ballInst.getMotion()).start();
-        Timer timer = new Timer(16, new BallTimerListener(this, ballInst, 100));
+                ballEntity.getBallPainter(),config.getBallTicksToDelete(), getWidth(), getHeight() * 2 / 3));
+        new Thread(ballEntity.getBallMotion()).start();
+        Timer timer = new Timer(16, new BallTimerListener(this, ballEntity));
         timer.start();
     }
 
-    public void spawnBall(BallInstance ballInst){
+    public void spawnBall(BallEntity ballInst) {
         balls.add(ballInst);
         startBallMotion(ballInst);
         repaint();
     }
 
-    public void removeBall(BallInstance ballInst){
+    public void removeBall(BallEntity ballInst) {
         balls.remove(ballInst);
     }
 
@@ -65,6 +70,10 @@ public class AnimPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
+
+        if (seaPainter == null) initSea();
+        if (beachPainter == null) initBeach();
+
         try {
             paintBackgroud(g2);
             paintCanon(g2);
@@ -77,58 +86,101 @@ public class AnimPanel extends JPanel {
     }
 
     private void paintBackgroud(Graphics2D g2) {
-        int w = getWidth();
-        int h = getHeight();
-        int twoThirds = getHeight() * 2 / 3;
+        paintSea(g2);
+        paintBeach(g2);
+    }
 
-        g2.setColor(new Color(41, 235, 242));
-        g2.fillRect(0, 0, w, twoThirds);
+    private void paintSea(Graphics2D g2) {
+        Graphics2D graphics = (Graphics2D) g2.create();
+        try {
+            graphics.translate(0, 0);
+            seaPainter.draw(graphics);
+        } finally {
+            graphics.dispose();
+        }
+    }
 
-        g2.setColor(new Color(242, 193, 41));
-        g2.fillRect(0, twoThirds, w, h - twoThirds);
+    private void paintBeach(Graphics2D g2) {
+        Graphics2D graphics = (Graphics2D) g2.create();
+        try {
+            graphics.translate(0, getHeight() * 2 / 3);
+            beachPainter.draw(graphics);
+        } finally {
+            graphics.dispose();
+        }
     }
 
     private void paintBalls(Graphics2D g2) {
-        for(BallInstance ballInst : balls){
-            if (ballInst.getMotion() != null) {
-                g2.translate(ballInst.getMotion().getCoordX(), ballInst.getMotion().getCoordY());
-                ballInst.getBall().draw(g2);
-                g2.translate(-ballInst.getMotion().getCoordX(), -ballInst.getMotion().getCoordY());
+        for (BallEntity ballballEntity : balls) {
+            Graphics2D graphics = (Graphics2D) g2.create();
+            try {
+                if (ballballEntity.getBallMotion() != null) {
+                    graphics.translate(ballballEntity.getBallMotion().getCoordX(),
+                            ballballEntity.getBallMotion().getCoordY());
+                    ballballEntity.getBallPainter().draw(graphics);
+                }
+            } finally {
+                graphics.dispose();
             }
         }
     }
 
     private void paintCanon(Graphics2D g2) {
-        int startCanonX = getWidth()/2;
+        int startCanonX = getWidth() / 2;
         int startCanonY = getHeight() * 2 / 3 - 20;
-
-        if(canon != null){
-            g2.translate(startCanonX, startCanonY);
-            canon.draw(g2);
-            g2.translate(-startCanonX, -startCanonY);
+        Graphics2D graphics = (Graphics2D) g2.create();
+        try {
+            if (canon != null) {
+                graphics.translate(startCanonX, startCanonY);
+                canon.draw(graphics);
+            }
+        } finally {
+            graphics.dispose();
         }
     }
 
     private void paintShip(Graphics2D g2) {
-        if (ship != null && shipMotion != null) {
-            g2.translate(shipMotion.getCoordX(), shipMotion.getCoordY());
-            ship.draw(g2);
-            g2.translate(-shipMotion.getCoordX(), -shipMotion.getCoordY());
+        Graphics2D graphics = (Graphics2D) g2.create();
+        try {
+            if (ship != null && shipMotion != null) {
+                graphics.translate(shipMotion.getCoordX(), shipMotion.getCoordY());
+                ship.draw(graphics);
+            }
+        } finally {
+            graphics.dispose();
         }
     }
 
+    //Config
     public void paintExplosion(Graphics2D g2) {
-        if (exp != null && ship == null){
-            int Xstep = 0;
-            int Ystep = 0;
-            for(int i = 0 ; i < 3; i++){
-                Xstep = ThreadLocalRandom.current().nextInt(-30, 30);
-                Ystep = ThreadLocalRandom.current().nextInt(-30, 30);
-                g2.translate(shipMotion.getCoordX() + Xstep, shipMotion.getCoordY() + Ystep);
-                exp.draw(g2);
-                g2.translate(-shipMotion.getCoordX() - Xstep, -shipMotion.getCoordY() - Ystep);
+        if (exp != null && ship == null) {
+            int Xstep, Ystep;
+            for (int i = 0; i < 3; i++) {
+                Graphics2D graphics = (Graphics2D) g2.create();
+                try {
+                    Xstep = ThreadLocalRandom.current().nextInt(-30, 30);
+                    Ystep = ThreadLocalRandom.current().nextInt(-30, 30);
+                    graphics.translate(shipMotion.getCoordX() + Xstep, shipMotion.getCoordY() + Ystep);
+                    exp.draw(graphics);
+                } finally {
+                    graphics.dispose();
+                }
             }
         }
+    }
+
+    public void initSea() {
+        int w = getWidth();
+        int h = getHeight() * 2 / 3;
+
+        seaPainter = new SeaPainter(w, h);
+    }
+
+    public void initBeach() {
+        int w = getWidth();
+        int h = getHeight() / 3;
+
+        beachPainter = new BeachPainter(w, h);
     }
 
     public void setShipMotion(ShipMotion shipMotion) {
@@ -147,7 +199,23 @@ public class AnimPanel extends JPanel {
         return canon;
     }
 
-    public Vector<BallInstance> getBalls() {
+    public Vector<BallEntity> getBalls() {
         return balls;
+    }
+
+    public void setSeaPainter(SeaPainter seaPainter) {
+        this.seaPainter = seaPainter;
+    }
+
+    public SeaPainter getSeaPainter() {
+        return seaPainter;
+    }
+
+    public void setBeachPainter(BeachPainter beachPainter) {
+        this.beachPainter = beachPainter;
+    }
+
+    public BeachPainter getBeachPainter() {
+        return beachPainter;
     }
 }
