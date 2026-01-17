@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
-public class ExplosionPainter implements Painter {
+public class ExplosionPainter implements IDrawable {
     private Path2D shape;
 
     public ExplosionPainter() {

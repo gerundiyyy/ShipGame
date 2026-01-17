@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
-public class ShipPainter implements Painter {
+public class ShipPainter implements IDrawable {
     private Path2D shape;
 
     ShipPainter(){

@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
-public class BallPainter implements Painter  {
+public class BallPainter implements IDrawable  {
     private Path2D shape;
 
     BallPainter(){

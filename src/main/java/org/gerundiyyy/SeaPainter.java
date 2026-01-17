@@ -1,10 +1,14 @@
 package org.gerundiyyy;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
-public class SeaPainter implements Painter {
+public class SeaPainter extends Sprited implements IDrawable {
     private Path2D shape;
     private int width;
     private int height;
@@ -12,12 +16,17 @@ public class SeaPainter implements Painter {
     SeaPainter(int width, int height){
         this.width = width;
         this.height = height;
+        setImgPath("src/main/resources/sprites/sea.png");
+        initImage();
         createShapeOfTheFigure();
     }
 
     @Override
     public void draw(Graphics2D g2) {
-        g2.setColor(new Color(41, 235, 242));
+        Rectangle2D spriteRect = new Rectangle2D.Double(0, 0, sprite.getWidth(), sprite.getHeight());
+        TexturePaint tp = new TexturePaint(sprite, spriteRect);
+
+        g2.setPaint(tp);
         g2.fill(shape);
     }
 
