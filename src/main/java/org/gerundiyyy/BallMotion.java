@@ -5,12 +5,14 @@ import java.awt.geom.Rectangle2D;
 public class BallMotion extends MotionModel implements Runnable {
     private final Object lock = new Object();
     private final BallPainter painter;
+    private final int ticksToDeleete;
     private final int seaW, seaH;
 
     public BallMotion(int CoordX, int CoordY, int SpeedX, int SpeedY, boolean running,
-                      BallPainter painter, int seaW, int seaH) {
+                      BallPainter painter, int ticksToDeleete, int seaW, int seaH) {
         super(CoordX, CoordY, SpeedX, SpeedY, running);
         this.painter = painter;
+        this.ticksToDeleete = ticksToDeleete;
         this.seaW = seaW;
         this.seaH = seaH;
 
@@ -83,6 +85,10 @@ public class BallMotion extends MotionModel implements Runnable {
 
     public int getSeaH() {
         return seaH;
+    }
+
+    public int getTicksToDeleete() {
+        return ticksToDeleete;
     }
 }
 

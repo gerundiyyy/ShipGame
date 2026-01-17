@@ -6,50 +6,54 @@ import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AnimPanel extends JPanel {
+    private GameConfig config;
     private ShipPainter ship = new ShipPainter();
     private final CannonPainter canon = new CannonPainter();
-    private final Vector<BallInstance> balls;
+    private final Vector<BallEntity> balls;
     private ShipMotion shipMotion;
     private final ExplosionPainter exp = new ExplosionPainter();
     private SeaPainter seaPainter;
     private BeachPainter beachPainter;
 
-    public AnimPanel(int startShipX, int startShipY) {
-        setPreferredSize(new Dimension(600, 400));
-        addComponentListener(new AnimPanelListener(this, startShipX, startShipY));
+    //Config
+    public AnimPanel(GameConfig config) {
+        this.config = config;
+        addComponentListener(new AnimPanelListener(this,
+                config.getShipCoordX(), config.getShipCoordY()));
         balls = new Vector<>();
     }
 
+    //Config
     public void startShipMotion(int startShipX, int startShipY) {
         shipMotion = new ShipMotion(startShipX, startShipY,
-                ThreadLocalRandom.current().nextInt(2, 5),
-                ThreadLocalRandom.current().nextInt(0, 3), true,
+                config.getShipSpeedX(), config.getShipSpeedY(),true,
                 ship, getWidth(), getHeight() * 2 / 3);
         new Thread(shipMotion).start();
         Timer timer = new Timer(16, new ShipTimerListener(this));
         timer.start();
     }
 
-    public void startBallMotion(BallInstance ballInst) {
+    //Config
+    public void startBallMotion(BallEntity ballEntity) {
         int startBallX = getWidth() / 2;
         int startBallY = getHeight() * 2 / 3 - 20;
 
-        ballInst.setMotion(new BallMotion(startBallX, startBallY,
+        ballEntity.setBallMotion(new BallMotion(startBallX, startBallY,
                 ThreadLocalRandom.current().nextInt(-5, 5),
                 ThreadLocalRandom.current().nextInt(-3, 3), true,
-                ballInst.getBall(), getWidth(), getHeight() * 2 / 3));
-        new Thread(ballInst.getMotion()).start();
-        Timer timer = new Timer(16, new BallTimerListener(this, ballInst, 200));
+                ballEntity.getBallPainter(),config.getBallTicksToDelete(), getWidth(), getHeight() * 2 / 3));
+        new Thread(ballEntity.getBallMotion()).start();
+        Timer timer = new Timer(16, new BallTimerListener(this, ballEntity));
         timer.start();
     }
 
-    public void spawnBall(BallInstance ballInst) {
+    public void spawnBall(BallEntity ballInst) {
         balls.add(ballInst);
         startBallMotion(ballInst);
         repaint();
     }
 
-    public void removeBall(BallInstance ballInst) {
+    public void removeBall(BallEntity ballInst) {
         balls.remove(ballInst);
     }
 
@@ -107,13 +111,13 @@ public class AnimPanel extends JPanel {
     }
 
     private void paintBalls(Graphics2D g2) {
-        for (BallInstance ballInst : balls) {
+        for (BallEntity ballballEntity : balls) {
             Graphics2D graphics = (Graphics2D) g2.create();
             try {
-                if (ballInst.getMotion() != null) {
-                    graphics.translate(ballInst.getMotion().getCoordX(),
-                            ballInst.getMotion().getCoordY());
-                    ballInst.getBall().draw(graphics);
+                if (ballballEntity.getBallMotion() != null) {
+                    graphics.translate(ballballEntity.getBallMotion().getCoordX(),
+                            ballballEntity.getBallMotion().getCoordY());
+                    ballballEntity.getBallPainter().draw(graphics);
                 }
             } finally {
                 graphics.dispose();
@@ -147,6 +151,7 @@ public class AnimPanel extends JPanel {
         }
     }
 
+    //Config
     public void paintExplosion(Graphics2D g2) {
         if (exp != null && ship == null) {
             int Xstep, Ystep;
@@ -194,7 +199,7 @@ public class AnimPanel extends JPanel {
         return canon;
     }
 
-    public Vector<BallInstance> getBalls() {
+    public Vector<BallEntity> getBalls() {
         return balls;
     }
 

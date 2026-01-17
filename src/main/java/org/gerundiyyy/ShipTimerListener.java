@@ -25,8 +25,8 @@ public class ShipTimerListener implements ActionListener {
 
         Rectangle2D shipRect = ap.getShipMotion().getRectCollision();
 
-        for (BallInstance ballInst : ap.getBalls()) {
-            BallMotion bm = ballInst.getMotion();
+        for (BallEntity ballEntity : ap.getBalls()) {
+            BallMotion bm = ballEntity.getBallMotion();
             if (bm == null) continue;
 
             Rectangle2D ballRect = bm.getRectCollision();

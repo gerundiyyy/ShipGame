@@ -14,8 +14,8 @@ public class ShotListener extends MouseAdapter {
     public void mousePressed(MouseEvent e) {
         // Проверяем, что нажата левая кнопка мыши
         if (e.getButton() == MouseEvent.BUTTON1) {
-            BallInstance ballInstance = new BallInstance(new BallPainter());
-            ap.spawnBall(ballInstance);
+            BallEntity ballEntity = new BallEntity(new BallPainter());
+            ap.spawnBall(ballEntity);
         }
     }
 }

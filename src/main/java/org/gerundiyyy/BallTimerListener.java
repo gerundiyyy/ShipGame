@@ -5,22 +5,20 @@ import java.awt.event.ActionListener;
 
 public class BallTimerListener implements ActionListener {
     final private AnimPanel ap;
-    final private BallInstance ballInst;
-    private final int ticksToDeleete;
+    private final BallEntity ballEntity;
     private int tickCounter = 0;
 
-    BallTimerListener(AnimPanel ap, BallInstance ballInst, int ticksToDeleete){
+    BallTimerListener(AnimPanel ap, BallEntity ballEntity){
         this.ap = ap;
-        this.ballInst = ballInst;
-        this.ticksToDeleete = ticksToDeleete;
+        this.ballEntity = ballEntity;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         ap.repaint();
         tickCounter++;
-        if(tickCounter == ticksToDeleete) {
-            ap.removeBall(ballInst);
+        if(tickCounter == ballEntity.getBallMotion().getTicksToDeleete()) {
+            ap.removeBall(ballEntity);
             ap.repaint();
         }
     }

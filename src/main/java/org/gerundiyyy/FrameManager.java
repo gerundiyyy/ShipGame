@@ -4,7 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class FrameManager extends JFrame {
-    final private AnimPanel animPanel = new AnimPanel(30,30);
+    private GameConfig config = new GameConfig();
+    final private AnimPanel animPanel = new AnimPanel(config);
     private Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
     final private int screen_Width = dim.width;
     final private int screen_Height = dim.height;
@@ -41,5 +42,13 @@ public class FrameManager extends JFrame {
 
     public int getScreen_Width() {
         return screen_Width;
+    }
+
+    public GameConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(GameConfig config) {
+        this.config = config;
     }
 }

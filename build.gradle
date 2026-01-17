@@ -1,5 +1,10 @@
 plugins {
     id 'java'
+    id 'application'
+}
+
+application{
+    mainClass = 'org.gerundiyyy.App'
 }
 
 group = 'org.example'

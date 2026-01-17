@@ -25,7 +25,6 @@ public abstract class MotionModel {
     public abstract void checkWBorder();
     public abstract void checkHBorder();
 
-    // Синхронизированные геттеры/сеттеры для потокобезопасности
     public synchronized int getCoordX() {
         return CoordX;
     }
